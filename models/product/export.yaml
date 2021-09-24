@@ -1,0 +1,15 @@
+# ===================================
+#  Export Column Definitions
+# ===================================
+
+columns:
+    user_defined_id:
+        label: 'hounddd.mallimportexport::lang.columns.user_defined_id'
+    published:
+        label: 'hounddd.mallimportexport::lang.columns.published'
+    stock:
+        label: 'hounddd.mallimportexport::lang.columns.stock'
+    allow_out_of_stock_purchases:
+        label: 'hounddd.mallimportexport::lang.columns.allow_out_of_stock_purchases'
+    weight:
+        label: 'hounddd.mallimportexport::lang.columns.weight'

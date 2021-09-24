@@ -1,0 +1,22 @@
+# ===================================
+#  Import/Export Behavior Config
+# ===================================
+
+import:
+    title: 'hounddd.mallimportexport::lang.import.title'
+    modelClass: Hounddd\MallImportExport\Models\ProductImport
+    list: $/hounddd/mallimportexport/models/product/import.yaml
+    redirect: offline/mall/products
+
+export:
+    title: 'hounddd.mallimportexport::lang.export.title'
+    modelClass: Hounddd\MallImportExport\Models\ProductExport
+    list: $/hounddd/mallimportexport/models/product/export.yaml
+    redirect: offline/mall/products
+    fileName: 'products_export.csv'
+
+defaultFormatOptions:
+    delimiter: ';'
+    enclosure: '"'
+    escape: '\'
+    encoding: 'utf-8'

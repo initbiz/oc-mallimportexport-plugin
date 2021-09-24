@@ -1,0 +1,11 @@
+<div style="display: table-row">
+    <div class="col-md-6">
+        <?= trans('hounddd.mallimportexport::lang.import.hint_content_left') ?>
+        <img class="img-responsive"  src="<?php echo asset('plugins/hounddd/mallimportexport/assets/images/'. $lang .'-export-csv-utf8.jpg'); ?>" alt=""/>
+    </div>
+    <div class="col-md-6">
+        <?= trans('hounddd.mallimportexport::lang.import.hint_content_right', [
+            'fields' => $requiredFields
+        ]) ?>
+    </div>
+</div>
