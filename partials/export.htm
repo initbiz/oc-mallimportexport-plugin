@@ -5,23 +5,26 @@
     </ul>
 <?php Block::endPut() ?>
 
-<!-- Complimentary sidebar -->
-<?php Block::put('form-sidebar') ?>
-<?php if ($this->user->hasAccess('hounddd.mallimportexport.import')): ?>
-    <a role="button"
-        href="<?= Backend::url('offline/mall/products/import') ?>"
-        class="btn btn-lg btn-block btn-success m-t-md p-x">
-        <i class="icon-cloud-upload"></i>
-        <?= e(trans('hounddd.mallimportexport::lang.menus.import')) ?>
-    </a>
-<?php endif ?>
-<?php Block::endPut() ?>
-
-
 <?php if (!$this->fatalError): ?>
 
     <?php Block::put('form-contents') ?>
         <div class="layout-row">
+
+            <div class="toolbar-widget list-header">
+                <div class="control-toolbar">
+                <div class="toolbar-item ">
+                    <?php if ($this->user->hasAccess('hounddd.mallimportexport.import')): ?>
+                        <a role="button"
+                            href="<?= Backend::url('offline/mall/products/import') ?>"
+                            class="btn btn-lg btn-success p-x">
+                            <i class="icon-cloud-upload"></i>
+                            <?= e(trans('hounddd.mallimportexport::lang.menus.import')) ?>
+                        </a>
+                    <?php endif ?>
+                </div>
+                </div>
+            </div>
+
             <?= $this->exportRender() ?>
 
             <div class="form-buttons">
@@ -39,9 +42,9 @@
 
 
     <?php Block::put('body') ?>
-        <?= Form::open(['class'=>'layout stretch']) ?>
+        <?= Form::open(['class'=>'layout']) ?>
 
-            <?= $this->makeLayout('form-with-sidebar') ?>
+            <?= Block::placeholder('form-contents') ?>
 
         <?= Form::close() ?>
     <?php Block::endPut() ?>

@@ -244,14 +244,13 @@ class Plugin extends PluginBase
             if (Config::get(sprintf('%s.%s::export.appendDate', $author, $plugin, false))) {
                 $fileName .= (date(Config::get(sprintf('%s.%s::export.dateFormat', $author, $plugin), '_Y-m-d')));
             }
-            
+
             $config->export['fileName'] = $fileName .'.csv';
 
             // Define property if not already defined
             if (!isset($controller->importExportConfig)) {
                 $controller->addDynamicProperty('importExportConfig', $config);
             }
-            $controller->bodyClass = 'compact-container';
         });
     }
 
