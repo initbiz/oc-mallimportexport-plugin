@@ -14,6 +14,7 @@ This plugin offers the possibility to import or export data into the [OFFLINE.Ma
  - authorisation for sales out of stock
  - weight
  - prices, additional prices and group prices, in all currencies.
+ - [and whatever you decide](#mallimportexportownfields)
 
 
 ## How it works
@@ -30,6 +31,29 @@ The plugin use currencies symbols to append same to the column name.
     <br />ex for a "Old price" price category : "Old price $", "Old price €", ... 
 
 You can define your own filename, date or column's names from [config](#mallimportexportconfig).
+
+### <a name="mallimportexportownfields"></a>Add your own columns
+You can listen for `hounddd.mallimportexport.config.update` event to add your own column definition.
+
+#### Example to add the product's name to export fields, at the second position
+```php
+/**
+ * Extend products controller export columns definition
+ */
+Event::listen('hounddd.mallimportexport.config.update', function ($controller, $config) {
+    $exportColumns = $config->export['list']->columns;
+    $position = 1;
+
+    $config->export['list']->columns = 
+        array_slice($exportColumns, 0, $position, true) +
+        [
+            'name' => [
+                'label' => 'offline.mall::lang.product.name'
+            ]
+        ] + 
+        array_slice($exportColumns, $position, count($exportColumns) - 1, true);
+});
+```
 
 ### Integration
 If the version of your OFFLINE.Mall plugin includes event hooks for toolbars (>= 1.14.4), you will find the import and export buttons at the top of the product list, otherwise an entry will be added to the side menu of the plugin.  

@@ -1,1 +1,2 @@
 1.0.1: First version of MallImportExport
+1.0.2: Allow import/export config to be extendable with events

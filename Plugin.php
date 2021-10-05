@@ -247,6 +247,9 @@ class Plugin extends PluginBase
 
             $config->export['fileName'] = $fileName .'.csv';
 
+            // Allow config to be extendable with events
+            Event::fire('hounddd.mallimportexport.config.update', [$controller, $config]);
+
             // Define property if not already defined
             if (!isset($controller->importExportConfig)) {
                 $controller->addDynamicProperty('importExportConfig', $config);
