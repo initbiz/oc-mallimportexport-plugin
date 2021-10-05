@@ -36,8 +36,6 @@ class ProductExport extends \Backend\Models\ExportModel
                     'variants.customer_group_prices',
                     'variants.additional_prices',
                 ])
-                // ->take(2)
-                // ->where('user_defined_id', 'CAPMX01')
                 ->get();
 
         $products = collect();
