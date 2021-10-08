@@ -2,8 +2,9 @@
 
 use Config;
 use Str;
-
+use Cms\Classes\Page;
 use OFFLINE\Mall\Models\Currency;
+use OFFLINE\Mall\Models\GeneralSettings;
 use OFFLINE\Mall\Models\Product;
 use OFFLINE\Mall\Models\Price;
 use OFFLINE\Mall\Models\ProductPrice;
@@ -13,15 +14,59 @@ class ProductExport extends \Backend\Models\ExportModel
 {
     public $requiredPermissions = ['hounddd.mallimportexport.export'];
 
-    public $currencies;
+    public $fillable = [
+        'link'
+    ];
 
-    public $defaultCurrency;
+    /**
+     * List of available currencies
+     *
+     * @var collection
+     */
+    protected $currencies;
+
+    /**
+     * Default currency
+     *
+     * @var Currency
+     */
+    protected $defaultCurrency;
+
+    /**
+     * Product page identifier
+     *
+     * @var string
+     */
+    protected $productPage;
+
+    /**
+     * Product page
+     *
+     * @var Page
+     */
+    protected $cmsPage;
+
+    private $exportLink = false;
 
     public function __construct()
     {
         parent::__construct();
         $this->currencies = Currency::orderBy('is_default', 'DESC')->orderBy('sort_order', 'ASC')->get();
         $this->defaultCurrency = Currency::where('is_default', true)->first();
+
+        $this->productPage    = GeneralSettings::get('product_page', 'product');
+        $this->cmsPage = Page::loadCached(config('cms.activeTheme'), $this->productPage);
+    }
+
+    /**
+     * Used to override column definitions at export time.
+     */
+    protected function exportExtendColumns($columns)
+    {
+        if ($this->exportLink) {
+            $columns['link'] = 'hounddd.mallimportexport::lang.columns.link';
+        }
+        return $columns;
     }
 
     public function exportData($columns, $sessionKey = null)
@@ -50,9 +95,18 @@ class ProductExport extends \Backend\Models\ExportModel
         });
 
         $products = $products->map(function ($product) {
-            return $this->getOtherPrices($product);
-        })
-        ->each(function ($product) use ($columns) {
+            return $this->addOtherPrices($product);
+        });
+
+        if ($this->link) {
+            $this->exportLink = true;
+            $columns[] = 'link';
+            $products = $products->map(function ($product) {
+                return $this->addLink($product);
+            });
+        }
+
+        $products = $products->each(function ($product) use ($columns) {
             $product->addVisible($columns);
         });
 
@@ -64,14 +118,17 @@ class ProductExport extends \Backend\Models\ExportModel
         return $data->toArray();
     }
 
-
-
-    private function getOtherPrices($product)
+    /**
+     * Add properties for each prices
+     *
+     * @param Product $product
+     * @return Product
+     */
+    protected function addOtherPrices($product)
     {
         foreach ($product->prices as $key => $price) {
             $product['price__'. $price->currency->code] = $this->formatedPriceNoSymbol($price->toArray());
         }
-
         foreach ($product->additional_prices as $key => $price) {
             $name = 'additional__'. $price->price_category_id .'__'. $price->currency->code;
             $product[$name] = $this->formatedPriceNoSymbol($price->toArray());
@@ -83,10 +140,44 @@ class ProductExport extends \Backend\Models\ExportModel
         return $product;
     }
 
+    /**
+     * Add link property to product's page
+     *
+     * @param Product $product
+     * @return Product
+     */
+    protected function addLink($product)
+    {
+        if ($this->cmsPage) {
+            $pageUrl = $this->cmsPage->url($this->productPage, ['slug' => $product->slug]);
+            $product['link'] = $pageUrl;
+        }
 
+        return $product;
+    }
 
+    /**
+     * Return formated price without currency symbol
+     *
+     * @param array $price
+     * @return string
+     */
+    protected function formatedPriceNoSymbol($price)
+    {
+        return trim(str_replace(
+            $price['currency']['symbol'],
+            '',
+            $price['price_formatted']
+        ));
+    }
 
-    private function encodeArrays($item)
+    /**
+     * Encore array values to json
+     *
+     * @param mixed $item
+     * @return mixed
+     */
+    protected function encodeArrays($item)
     {
         if (is_array($item)) {
             foreach ($item as $key => $value) {
@@ -96,35 +187,5 @@ class ProductExport extends \Backend\Models\ExportModel
             }
         }
         return $item;
-    }
-
-
-    private function getPrices($prices)
-    {
-        if (count($prices) == 1) {
-            $price = $prices[0];
-            $prices = $this->formatedPriceNoSymbol($price);
-        } else {
-            foreach ($prices as $key => $price) {
-                if (is_array($price)) {
-                    $prices[$key] = [
-                        $price['currency']['code'] => $this->formatedPriceNoSymbol($price),
-                    ];
-                    return $prices;
-                }
-            }
-        }
-        return $prices;
-    }
-
-
-    private function formatedPriceNoSymbol($price)
-    {
-        return trim(str_replace(
-            $price['currency']['symbol'],
-            '',
-            $price['price_formatted']
-        ));
-        // return number_format($price['price'] / 100, $price['currency']['decimals']);
     }
 }

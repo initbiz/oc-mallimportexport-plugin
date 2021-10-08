@@ -1,0 +1,10 @@
+# ===================================
+#  Form Field Definitions
+# ===================================
+
+fields:
+
+    link:
+        label: 'hounddd.mallimportexport::lang.ux.export_links'
+        type: checkbox
+        default: true

@@ -12,6 +12,7 @@ export:
     title: 'hounddd.mallimportexport::lang.export.title'
     modelClass: Hounddd\MallImportExport\Models\ProductExport
     list: $/hounddd/mallimportexport/models/product/export.yaml
+    form: $/hounddd/mallimportexport/models/product/export_fields.yaml
     redirect: offline/mall/products
     fileName: 'products_export.csv'
 

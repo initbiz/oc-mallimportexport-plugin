@@ -40,11 +40,13 @@ return [
         'stock' => 'Stock',
         'user_defined_id' => 'Reference',
         'weight' => 'Weight (g)',
+        'link' => 'Link to product',
     ],
 
     'ux' => [
         'export_button' => 'Export data',
         'import_button' => 'Update data',
+        'export_links' => 'Export link to product',
         'return_list' => 'Back to the product list',
     ],
 ];

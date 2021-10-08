@@ -40,11 +40,13 @@ return [
         'stock' => 'Stock',
         'user_defined_id' => 'Référence',
         'weight' => 'Poids (g)',
+        'link' => 'Lien vers le produit',
     ],
 
     'ux' => [
         'export_button' => 'Exporter les données',
         'import_button' => 'Mettre à jour les données',
+        'export_links' => 'Exporter un lien vers le produit',
         'return_list' => 'Retourner à la liste des produits',
     ],
 
