@@ -1,5 +1,6 @@
 <?php namespace Hounddd\MallImportExport\Models;
 
+use Backend;
 use Config;
 use Str;
 use Cms\Classes\Page;
@@ -15,7 +16,9 @@ class ProductExport extends \Backend\Models\ExportModel
     public $requiredPermissions = ['hounddd.mallimportexport.export'];
 
     public $fillable = [
-        'link'
+        'only_variants',
+        'link',
+        'admin_link',
     ];
 
     /**
@@ -47,6 +50,7 @@ class ProductExport extends \Backend\Models\ExportModel
     protected $cmsPage;
 
     private $exportLink = false;
+    private $exportAdminLink = false;
 
     public function __construct()
     {
@@ -66,8 +70,12 @@ class ProductExport extends \Backend\Models\ExportModel
         if ($this->exportLink) {
             $columns['link'] = 'hounddd.mallimportexport::lang.columns.link';
         }
+        if ($this->exportAdminLink) {
+            $columns['admin_link'] = 'hounddd.mallimportexport::lang.columns.admin_link';
+        }
         return $columns;
     }
+
 
     public function exportData($columns, $sessionKey = null)
     {
@@ -86,7 +94,9 @@ class ProductExport extends \Backend\Models\ExportModel
         $products = collect();
 
         $productsWithVariants->each(function ($product, $key) use ($products) {
-            $products->push($product);
+            if (! (bool)$this->only_variants || $product->inventory_management_method === 'single') {
+                $products->push($product);
+            }
             if ($product->inventory_management_method === 'variant') {
                 $product->variants->each(function ($item) use ($products) {
                     $products->push($item);
@@ -103,6 +113,14 @@ class ProductExport extends \Backend\Models\ExportModel
             $columns[] = 'link';
             $products = $products->map(function ($product) {
                 return $this->addLink($product);
+            });
+        }
+
+        if ($this->admin_link) {
+            $this->exportAdminLink = true;
+            $columns[] = 'admin_link';
+            $products = $products->map(function ($product) {
+                return $this->addAdminLink($product);
             });
         }
 
@@ -153,6 +171,22 @@ class ProductExport extends \Backend\Models\ExportModel
             $product['link'] = $pageUrl;
         }
 
+        return $product;
+    }
+
+    /**
+     * Add admin_link property to product's edit page
+     *
+     * @param Product $product
+     * @return Product
+     */
+    protected function addAdminLink($product)
+    {
+        $productId = $product->id;
+        if ($product instanceof Variant) {
+            $productId = $product->product->id;
+        }
+        $product['admin_link'] = Backend::url('offline/mall/products/update/'. $productId);
         return $product;
     }
 

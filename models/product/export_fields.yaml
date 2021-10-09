@@ -4,7 +4,26 @@
 
 fields:
 
+    only_variants:
+        label: 'hounddd.mallimportexport::lang.ux.only_variants'
+        comment: 'hounddd.mallimportexport::lang.ux.only_variants_comment'
+        type: checkbox
+        span: storm
+        cssClass: col-md-3
+        default: true
+
     link:
         label: 'hounddd.mallimportexport::lang.ux.export_links'
+        comment: 'hounddd.mallimportexport::lang.ux.export_links_comment'
         type: checkbox
-        default: true
+        span: storm
+        cssClass: col-md-3
+        default: false
+
+    admin_link:
+        label: 'hounddd.mallimportexport::lang.ux.export_admin_links'
+        comment: 'hounddd.mallimportexport::lang.ux.export_admin_links_comment'
+        type: checkbox
+        span: storm
+        cssClass: col-md-3
+        default: false

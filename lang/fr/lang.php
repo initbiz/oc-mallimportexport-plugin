@@ -41,12 +41,18 @@ return [
         'user_defined_id' => 'Référence',
         'weight' => 'Poids (g)',
         'link' => 'Lien vers le produit',
+        'admin_link' => 'Editer le produit',
     ],
 
     'ux' => [
         'export_button' => 'Exporter les données',
         'import_button' => 'Mettre à jour les données',
+        'only_variants' => 'Uniquement les variantes',
+        'only_variants_comment' => 'pour les produits avec variantes, ne conserver que les variantes',
         'export_links' => 'Exporter un lien vers le produit',
+        'export_links_comment' => 'un lien vers la page publique du produit est ajouté',
+        'export_admin_links' => 'Exporter le lien vers le backend du produit',
+        'export_admin_links_comment' => 'un lien vers la page de modification du produit est ajouté',
         'return_list' => 'Retourner à la liste des produits',
     ],
 

@@ -41,12 +41,18 @@ return [
         'user_defined_id' => 'Reference',
         'weight' => 'Weight (g)',
         'link' => 'Link to product',
+        'admin_link' => 'Edit product',
     ],
 
     'ux' => [
         'export_button' => 'Export data',
         'import_button' => 'Update data',
+        'only_variants' => 'Only product variants',
+        'only_variants_comment' => 'for products with variants, keep only the variants',
         'export_links' => 'Export link to product',
+        'export_links_comment' => 'a link to the public product page is added',
+        'export_admin_links' => 'Export link to product’s backend',
+        'export_admin_links_comment' => 'a link to the edit product page is added',
         'return_list' => 'Back to the product list',
     ],
 ];
