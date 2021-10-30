@@ -54,10 +54,12 @@ class ProductImport extends \Backend\Models\ImportModel
                         Lang::get("hounddd.mallimportexport::lang.import.errors.emptyline")
                     );
                 } else {
-                    $product = Product::where('user_defined_id', $ref)->first();
+                    $product = Variant::where('user_defined_id', $ref)->first();
                     if (!$product) {
-                        $product = Variant::where('user_defined_id', $ref)->first();
+                        $product = Product::where('user_defined_id', $ref)->first();
                     }
+
+                    $data['published'] = $data['published'] == 1 ? true: false;
 
                     if ($product) {
                         $product->fill($data);
