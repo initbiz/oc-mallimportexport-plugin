@@ -93,6 +93,7 @@ class ProductExport extends \Backend\Models\ExportModel
 
         $products = collect();
 
+        // Reorder variants just after their parent product
         $productsWithVariants->each(function ($product, $key) use ($products) {
             if (! (bool)$this->only_variants || $product->inventory_management_method === 'single') {
                 $products->push($product);
@@ -104,10 +105,12 @@ class ProductExport extends \Backend\Models\ExportModel
             }
         });
 
+        // Add other prices
         $products = $products->map(function ($product) {
             return $this->addOtherPrices($product);
         });
 
+        // Add public link to product
         if ($this->link) {
             $this->exportLink = true;
             $columns[] = 'link';
@@ -116,6 +119,7 @@ class ProductExport extends \Backend\Models\ExportModel
             });
         }
 
+        // Add admin link to product
         if ($this->admin_link) {
             $this->exportAdminLink = true;
             $columns[] = 'admin_link';
@@ -129,6 +133,9 @@ class ProductExport extends \Backend\Models\ExportModel
         });
 
         $collection = collect($products->toArray());
+        $collection = $collection->map(function ($item) {
+            return $this->emptyToFalse($item);
+        });
         $data = $collection->map(function ($item) {
             return $this->encodeArrays($item);
         });
@@ -206,7 +213,22 @@ class ProductExport extends \Backend\Models\ExportModel
     }
 
     /**
-     * Encore array values to json
+     * Check for empty values and replace them by a logical false
+     *
+     * @param mixed $item
+     * @return mixed
+     */
+    protected function emptyToFalse($item)
+    {
+        if (is_array($item)) {
+            $item['published']                    = $item['published'] ?: 0;
+            $item['allow_out_of_stock_purchases'] = $item['allow_out_of_stock_purchases'] ?: 0;
+        }
+        return $item;
+    }
+
+    /**
+     * Encode array values to json
      *
      * @param mixed $item
      * @return mixed
@@ -219,6 +241,7 @@ class ProductExport extends \Backend\Models\ExportModel
                     $item[$key] = json_encode($value);
                 }
             }
+            $item['published'] = $item['published'] ?: 0;
         }
         return $item;
     }
