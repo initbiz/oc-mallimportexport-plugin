@@ -49,6 +49,16 @@ class ProductExport extends \Backend\Models\ExportModel
      */
     protected $cmsPage;
 
+    /**
+     * Product page
+     *
+     * @var Page
+     */
+    protected $castAsBolean = [
+        'published',
+        'allow_out_of_stock_purchases',
+    ];
+
     private $exportLink = false;
     private $exportAdminLink = false;
 
@@ -221,8 +231,9 @@ class ProductExport extends \Backend\Models\ExportModel
     protected function emptyToFalse($item)
     {
         if (is_array($item)) {
-            $item['published']                    = $item['published'] ?: 0;
-            $item['allow_out_of_stock_purchases'] = $item['allow_out_of_stock_purchases'] ?: 0;
+            foreach ($this->castAsBolean as $key => $attribute) {
+                $item[$attribute] = array_get($item, $attribute, 0) == 1 ?: 0;
+            }
         }
         return $item;
     }
