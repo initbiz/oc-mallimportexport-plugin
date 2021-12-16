@@ -1,2 +1,4 @@
 1.0.1: First version of MallImportExport
 1.0.2: Allow import/export config to be extendable with events
+1.0.3: Add options to export public and backend links to products
+1.0.4: Add options to fine tune column names and to avoid some characters encoding errors in export/import files

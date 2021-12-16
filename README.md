@@ -90,15 +90,24 @@ return [
     'export' => [
         'fileName' => 'Export_produits',    // New export filename, default "Products_export"
         'appendDate' => true,               // Append date to filename, default true
-        'dateFormat' => '_Y-m-d-z',         // How to format append date, default '_Y-m-d'
-    ]
+        'dateFormat' => '_Y-m-d-z',         // How to format appended date, default '_Y-m-d'
+    ],
+
+    'useCurrencySymbol' => true,            // Use currency symbol or code, default true
+    'removeDiacritics' => false,            // Remove diactritcis chars in additional prices column labels, default false
 ];
 ```
+ - **useCurrencySymbol** : (default true) Defined if additionnal price columns must use currency symbol ou currency code.  
+ - **removeDiacritics** : (default false) Defined if diacritics characters must be removed from prices and additionnal prices column labels.  
+
+For the other columns use the translations (see below).  
+This allows you to bypass encoding problems with import or export files.  
+
 See [PHP date format](https://www.php.net/manual/datetime.format.php) for dateFormat accepted values.  
 Remember that this is for the name of a file, respect the conventions to avoid trouble.
 
 ### Csv file column's names
-You can change the column names to match your needs, simply add a `\lang\XX\hounddd\mallimportexport\lang.php` (xhere XX is your locale) to your site.
+You can change the column names to match your needs, simply add a `\lang\XX\hounddd\mallimportexport\lang.php` (where XX is your locale) to your site.
 ```php
 <?php
     return [

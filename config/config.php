@@ -8,5 +8,5 @@ return [
         'fileName' => 'Products_export',
         'appendDate' => true,
         'dateFormat' => '_Y-m-d',
-    ]
+    ],
 ];
