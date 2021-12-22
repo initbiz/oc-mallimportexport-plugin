@@ -93,7 +93,7 @@ return [
         'dateFormat' => '_Y-m-d-z',         // How to format appended date, default '_Y-m-d'
     ],
 
-    'useCurrencySymbol' => true,            // Use currency symbol or code, default true
+    'useCurrencySymbol' => true,            // Use currency symbol (true), code (false), or nothing (null), default true
     'removeDiacritics' => false,            // Remove diactritcis chars in additional prices column labels, default false
 ];
 ```

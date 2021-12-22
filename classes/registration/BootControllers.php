@@ -70,6 +70,14 @@ trait BootControllers
                 $currentLocale
             );
 
+            // Init currency symbol 
+            $currencySymbol = '';
+            if ($this->useCurrencySymbol === true) {
+                $currencySymbol = $currency->symbol;
+            } elseif ($this->useCurrencySymbol === false) {
+                $currencySymbol = $currency->code;
+            }
+
             // Implement behavior if not already implemented
             if (!$controller->isClassExtendedWith('Backend.Behaviors.ImportExportController')) {
                 $controller->implement[] = 'Backend.Behaviors.ImportExportController';
@@ -85,9 +93,9 @@ trait BootControllers
             $currencies->each(function (Currency $currency) use (
                 $importList,
                 $exportList,
-                $priceTrad
+                $priceTrad,
+                $currencySymbol
             ) {
-                $currencySymbol = $this->useCurrencySymbol ? $currency->symbol : $currency->code;
                 $label = $this->removeDiacritics(sprintf('%s %s', $priceTrad, $currencySymbol));
 
                 $importList->columns['price__' . $currency->code] = [

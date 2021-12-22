@@ -59,7 +59,16 @@ class ProductImport extends \Backend\Models\ImportModel
                         $product = Product::where('user_defined_id', $ref)->first();
                     }
 
-                    $data['published'] = $data['published'] == 1 ? true: false;
+                    // Test for published status
+                    $published = isset($data['published']) ? $data['published'] : null;
+                    if ($published !== null) {
+                        if ($published == '1') {
+                            $published = true;
+                        } else {
+                            $published = false;
+                        }
+                        $data['published'] = $published;
+                    }
 
                     if ($product) {
                         $product->fill($data);
