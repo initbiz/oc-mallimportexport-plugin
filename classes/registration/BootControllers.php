@@ -70,7 +70,8 @@ trait BootControllers
                 $currentLocale
             );
 
-            // Init currency symbol 
+            // Init currency symbol
+            $currency = Currency::activeCurrency();
             $currencySymbol = '';
             if ($this->useCurrencySymbol === true) {
                 $currencySymbol = $currency->symbol;
