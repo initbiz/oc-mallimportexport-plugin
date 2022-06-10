@@ -15,7 +15,7 @@
     "require": {
         "php": ">=7.2",
         "composer/installers": "~1.0",
-        "offline/oc-mall-plugin": "^1.0.1"
+        "offline/oc-mall-plugin": "^1.0||^2.0"
     },
     "extra": {
         "installer-name": "mallimportexport"
