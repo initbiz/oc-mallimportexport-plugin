@@ -30,7 +30,7 @@ class ProductImport extends \Backend\Models\ImportModel
     private $defaultCurrency;
     private $priceTrad;
 
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
         parent::__construct();
         $this->currencies = Currency::orderBy('is_default', 'DESC')->orderBy('sort_order', 'ASC')->get();

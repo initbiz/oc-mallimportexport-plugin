@@ -62,7 +62,7 @@ class ProductExport extends \Backend\Models\ExportModel
     private $exportLink = false;
     private $exportAdminLink = false;
 
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
         parent::__construct();
         $this->currencies = Currency::orderBy('is_default', 'DESC')->orderBy('sort_order', 'ASC')->get();
