@@ -5,7 +5,7 @@ return [
     'plugin' => [
         'name' => 'Mall import/export',
         'description' => 'Simple Import/Export pour le plugin Offline.Mall',
-        'author' => 'Hounddd'
+        'author' => 'Initbiz'
     ],
 
     'menus' => [

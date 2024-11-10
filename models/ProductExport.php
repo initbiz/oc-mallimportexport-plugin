@@ -1,19 +1,17 @@
-<?php namespace Hounddd\MallImportExport\Models;
+<?php
+
+namespace Initbiz\MallImportExport\Models;
 
 use Backend;
-use Config;
-use Str;
 use Cms\Classes\Page;
+use OFFLINE\Mall\Models\Product;
+use OFFLINE\Mall\Models\Variant;
 use OFFLINE\Mall\Models\Currency;
 use OFFLINE\Mall\Models\GeneralSettings;
-use OFFLINE\Mall\Models\Product;
-use OFFLINE\Mall\Models\Price;
-use OFFLINE\Mall\Models\ProductPrice;
-use OFFLINE\Mall\Models\Variant;
 
 class ProductExport extends \Backend\Models\ExportModel
 {
-    public $requiredPermissions = ['hounddd.mallimportexport.export'];
+    public $requiredPermissions = ['initbiz.mallimportexport.export'];
 
     public $fillable = [
         'only_variants',
@@ -78,10 +76,10 @@ class ProductExport extends \Backend\Models\ExportModel
     protected function exportExtendColumns($columns)
     {
         if ($this->exportLink) {
-            $columns['link'] = 'hounddd.mallimportexport::lang.columns.link';
+            $columns['link'] = 'initbiz.mallimportexport::lang.columns.link';
         }
         if ($this->exportAdminLink) {
-            $columns['admin_link'] = 'hounddd.mallimportexport::lang.columns.admin_link';
+            $columns['admin_link'] = 'initbiz.mallimportexport::lang.columns.admin_link';
         }
         return $columns;
     }
@@ -93,13 +91,13 @@ class ProductExport extends \Backend\Models\ExportModel
         $columns[] = 'customer_group_prices';
 
         $productsWithVariants = Product::with([
-                    'prices',
-                    'additional_prices',
-                    'customer_group_prices',
-                    'variants.customer_group_prices',
-                    'variants.additional_prices',
-                ])
-                ->get();
+            'prices',
+            'additional_prices',
+            'customer_group_prices',
+            'variants.customer_group_prices',
+            'variants.additional_prices',
+        ])
+            ->get();
 
         $products = collect();
 
@@ -162,14 +160,14 @@ class ProductExport extends \Backend\Models\ExportModel
     protected function addOtherPrices($product)
     {
         foreach ($product->prices as $key => $price) {
-            $product['price__'. $price->currency->code] = $this->formatedPriceNoSymbol($price->toArray());
+            $product['price__' . $price->currency->code] = $this->formatedPriceNoSymbol($price->toArray());
         }
         foreach ($product->additional_prices as $key => $price) {
-            $name = 'additional__'. $price->price_category_id .'__'. $price->currency->code;
+            $name = 'additional__' . $price->price_category_id . '__' . $price->currency->code;
             $product[$name] = $this->formatedPriceNoSymbol($price->toArray());
         }
         foreach ($product->customer_group_prices as $key => $price) {
-            $name = 'group__'. $price->customer_group_id .'__'. $price->currency->code;
+            $name = 'group__' . $price->customer_group_id . '__' . $price->currency->code;
             $product[$name] = $this->formatedPriceNoSymbol($price->toArray());
         }
         return $product;
@@ -203,7 +201,7 @@ class ProductExport extends \Backend\Models\ExportModel
         if ($product instanceof Variant) {
             $productId = $product->product->id;
         }
-        $product['admin_link'] = Backend::url('offline/mall/products/update/'. $productId);
+        $product['admin_link'] = Backend::url('offline/mall/products/update/' . $productId);
         return $product;
     }
 

@@ -1,8 +1,2 @@
-1.0.1: First version of MallImportExport
-1.0.2: Allow import/export config to be extendable with events
-1.0.3: Add options to export public and backend links to products
-1.0.4: Add options to fine tune column names and to avoid some characters encoding errors in export/import files
-1.0.5: More configurable options and small bugfix
-1.0.6: Add OFFLINE.Mall v2.x as requirements
-1.0.7: Improve Winter 1.2 compatibility
-2.0.0: Update mall required version
+1.0.1:
+    - Forked from Hounddd/wn-mallimportexport-plugin and cleaned up

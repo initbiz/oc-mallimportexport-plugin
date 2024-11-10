@@ -1,21 +1,20 @@
-<?php namespace Hounddd\MallImportExport\Models;
+<?php
 
-use Config;
+namespace Initbiz\MallImportExport\Models;
+
 use Lang;
-use Str;
-
-use OFFLINE\Mall\Models\Currency;
-use OFFLINE\Mall\Models\CustomerGroup;
-use OFFLINE\Mall\Models\CustomerGroupPrice;
-use OFFLINE\Mall\Models\Product;
 use OFFLINE\Mall\Models\Price;
-use OFFLINE\Mall\Models\PriceCategory;
-use OFFLINE\Mall\Models\ProductPrice;
+use OFFLINE\Mall\Models\Product;
 use OFFLINE\Mall\Models\Variant;
+use OFFLINE\Mall\Models\Currency;
+use OFFLINE\Mall\Models\ProductPrice;
+use OFFLINE\Mall\Models\CustomerGroup;
+use OFFLINE\Mall\Models\PriceCategory;
+use OFFLINE\Mall\Models\CustomerGroupPrice;
 
 class ProductImport extends \Backend\Models\ImportModel
 {
-    public $requiredPermissions = ['hounddd.mallimportexport.import'];
+    public $requiredPermissions = ['initbiz.mallimportexport.import'];
 
     /**
      * @var array The rules to be applied to the data.
@@ -27,7 +26,6 @@ class ProductImport extends \Backend\Models\ImportModel
     private $additionalPriceCategories;
     private $customerGroups;
     private $currencies;
-    private $defaultCurrency;
     private $priceTrad;
 
     public function __construct(array $attributes = [])
@@ -51,7 +49,7 @@ class ProductImport extends \Backend\Models\ImportModel
                 if ($ref == '') {
                     $this->logSkipped(
                         $row,
-                        Lang::get("hounddd.mallimportexport::lang.import.errors.emptyline")
+                        Lang::get("initbiz.mallimportexport::lang.import.errors.emptyline")
                     );
                 } else {
                     $product = Variant::where('user_defined_id', $ref)->first();
@@ -62,10 +60,10 @@ class ProductImport extends \Backend\Models\ImportModel
                     // Test for published status
                     $published = isset($data['published']) ? $data['published'] : null;
                     if ($published !== null) {
+                        $published = false;
+
                         if ($published == '1') {
                             $published = true;
-                        } else {
-                            $published = false;
                         }
                         $data['published'] = $published;
                     }
@@ -74,13 +72,7 @@ class ProductImport extends \Backend\Models\ImportModel
                         $product->fill($data);
                         $product->save();
 
-                        $this->setPrices(
-                            $data,
-                            $product,
-                            $row,
-                            $ref
-                        );
-
+                        $this->setPrices($data, $product, $row, $ref);
                         $this->logUpdated();
                     }
                 }
@@ -91,27 +83,18 @@ class ProductImport extends \Backend\Models\ImportModel
         return false;
     }
 
-
-
-
     private function setPrices($data, $product, $row, $ref)
     {
         $skipped = '';
 
-        $this->currencies->each(function (Currency $currency) use (
-            $data,
-            $product,
-            $row,
-            $ref,
-            &$skipped
-        ) {
+        $this->currencies->each(function (Currency $currency) use ($data, $product, &$skipped) {
             // Regular prices
-            $price = array_get($data, 'price__'. $currency->code, null);
+            $price = array_get($data, 'price__' . $currency->code, null);
 
             if (!is_null($price)) {
                 if (!$this->isValidPrice($price)) {
                     $skipped .= Lang::get(
-                        "hounddd.mallimportexport::lang.import.errors.notanumber",
+                        "initbiz.mallimportexport::lang.import.errors.notanumber",
                         [
                             'type' => sprintf('%s %s', $this->priceTrad, $currency->symbol),
                             'price' => $price
@@ -125,12 +108,12 @@ class ProductImport extends \Backend\Models\ImportModel
 
                     if ($product instanceof Product) {
                         $productPrice = ProductPrice::where('currency_id', $currency->id)
-                                ->where('product_id', $product->id);
+                            ->where('product_id', $product->id);
                         $dataPrice['product_id'] = $product->id;
                     } elseif ($product instanceof Variant) {
                         $productPrice = ProductPrice::where('currency_id', $currency->id)
-                                ->where('product_id', $product->product->id)
-                                ->where('variant_id', $product->id);
+                            ->where('product_id', $product->product->id)
+                            ->where('variant_id', $product->id);
 
                         $dataPrice['product_id'] = $product->product->id;
                         $dataPrice['variant_id'] = $product->id;
@@ -155,12 +138,12 @@ class ProductImport extends \Backend\Models\ImportModel
                 $product,
                 &$skipped
             ) {
-                $price = trim(array_get($data, 'additional__'. $category->id .'__'. $currency->code, null));
+                $price = trim(array_get($data, 'additional__' . $category->id . '__' . $currency->code, null));
 
                 if (!is_null($price)) {
                     if (!$this->isValidPrice($price)) {
                         $skipped .= Lang::get(
-                            "hounddd.mallimportexport::lang.import.errors.notanumber",
+                            "initbiz.mallimportexport::lang.import.errors.notanumber",
                             [
                                 'type' => sprintf('%s %s', $this->priceTrad, $currency->symbol),
                                 'price' => $price
@@ -195,12 +178,12 @@ class ProductImport extends \Backend\Models\ImportModel
                 $product,
                 &$skipped
             ) {
-                $price = trim(array_get($data, 'group__'. $group->id .'__'. $currency->code, null));
+                $price = trim(array_get($data, 'group__' . $group->id . '__' . $currency->code, null));
 
                 if (!is_null($price)) {
                     if (!$this->isValidPrice($price)) {
                         $skipped .= Lang::get(
-                            "hounddd.mallimportexport::lang.import.errors.notanumber",
+                            "initbiz.mallimportexport::lang.import.errors.notanumber",
                             [
                                 'type' => sprintf('%s %s', $this->priceTrad, $currency->symbol),
                                 'price' => $price
@@ -231,17 +214,15 @@ class ProductImport extends \Backend\Models\ImportModel
 
         if ($skipped != '') {
             $skipped = Lang::get(
-                "hounddd.mallimportexport::lang.import.errors.forref",
+                "initbiz.mallimportexport::lang.import.errors.forref",
                 [
                     'ref' => $ref
                 ]
-            ). $skipped .'.';
+            ) . $skipped . '.';
 
             $this->logSkipped($row, $skipped);
         }
     }
-
-
 
     private function isValidPrice($price)
     {
@@ -260,7 +241,6 @@ class ProductImport extends \Backend\Models\ImportModel
 
         return $valid;
     }
-
 
     private function floatValue($val)
     {

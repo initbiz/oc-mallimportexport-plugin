@@ -3,16 +3,16 @@
 # ===================================
 
 import:
-    title: 'hounddd.mallimportexport::lang.import.title'
-    modelClass: Hounddd\MallImportExport\Models\ProductImport
-    list: $/hounddd/mallimportexport/models/product/import.yaml
+    title: 'initbiz.mallimportexport::lang.import.title'
+    modelClass: Initbiz\MallImportExport\Models\ProductImport
+    list: $/initbiz/mallimportexport/models/product/import.yaml
     redirect: offline/mall/products
 
 export:
-    title: 'hounddd.mallimportexport::lang.export.title'
-    modelClass: Hounddd\MallImportExport\Models\ProductExport
-    list: $/hounddd/mallimportexport/models/product/export.yaml
-    form: $/hounddd/mallimportexport/models/product/export_fields.yaml
+    title: 'initbiz.mallimportexport::lang.export.title'
+    modelClass: Initbiz\MallImportExport\Models\ProductExport
+    list: $/initbiz/mallimportexport/models/product/export.yaml
+    form: $/initbiz/mallimportexport/models/product/export_fields.yaml
     redirect: offline/mall/products
     fileName: 'products_export.csv'
 

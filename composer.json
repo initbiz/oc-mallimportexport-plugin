@@ -1,22 +1,10 @@
 {
-    "name": "hounddd/wn-mallimportexport-plugin",
-    "type": "winter-plugin",
-    "description": "Import or export data to OFFLINE.mall.",
-    "homepage": "https://github.com/Hounddd/wn-mallimportexport-plugin",
-    "keywords": ["winter cms", "winter", "plugin", "mall"],
+    "name": "initbiz/mallimportexport-plugin",
+    "type": "october-plugin",
+    "description": "Import to or export data from OFFLINE.mall.",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Hounddd - Damien MATHIEU",
-            "email": "damien@hounddd.fr",
-            "role": "Original Author"
-        }
-    ],
     "require": {
         "composer/installers": "~1.0",
-        "offline/oc-mall-plugin": "^1.0||^2.0.0"
-    },
-    "extra": {
-        "installer-name": "mallimportexport"
+        "offline/oc-mall-plugin": "^3.5"
     }
 }

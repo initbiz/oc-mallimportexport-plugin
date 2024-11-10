@@ -1,48 +1,39 @@
-<?php namespace Hounddd\MallImportExport\Classes\Registration;
+<?php
+
+namespace Initbiz\MallImportExport\EventHandlers;
 
 use App;
-use Config;
-use Event;
 use Lang;
-use Backend\Models\UserPreference;
+use Event;
+use Config;
 use OFFLINE\Mall\Models\Currency;
+use Backend\Models\UserPreference;
+use OFFLINE\Mall\Controllers\Products;
 use OFFLINE\Mall\Models\CustomerGroup;
 use OFFLINE\Mall\Models\PriceCategory;
 
-trait BootControllers
+class OfflineMallHandler
 {
-    protected $author;
-    protected $plugin;
-    protected $removeDiacritics = false;
-    protected $useCurrencySymbol = true;
-
-    protected function registerControllers()
+    public function subscribe($event)
     {
-        // Init some vars
-        list($this->author, $this->plugin) = explode('\\', strtolower(get_class()));
-        $this->removeDiacritics = Config::get(
-            sprintf('%s.%s::removeDiacritics', $this->author, $this->plugin),
-            false
-        );
-        $this->useCurrencySymbol = Config::get(
-            sprintf('%s.%s::useCurrencySymbol', $this->author, $this->plugin),
-            true
-        );
-
-        $this->extendMallProduct();
+        if (App::runningInBackend()) {
+            $this->extendMallProduct($event);
+        }
     }
 
-    protected function extendMallProduct()
+    protected function extendMallProduct(Event $event)
     {
-        /**
-         * Extend controllers
-         */
-        \OFFLINE\Mall\Controllers\Products::extend(function ($controller) {
+        Products::extend(function ($controller) {
+            if (!$controller->isClassExtendedWith('Backend.Behaviors.ImportExportController')) {
+                $controller->implement[] = 'Backend.Behaviors.ImportExportController';
+            }
 
-            // Init some vars
-            $config = $controller->makeConfig(
-                sprintf('$/%s/%s/config/product_import_export.yaml', $this->author, $this->plugin)
-            );
+            $config = $controller->makeConfig('$/initbiz/mallimportexport/config/product_import_export.yaml');
+
+            if (!isset($controller->importExportConfig)) {
+                $controller->addDynamicProperty('importExportConfig', $config);
+            }
+
             $importList = $controller->makeConfig($config->import['list']);
             $exportList = $controller->makeConfig($config->export['list']);
 
@@ -59,49 +50,29 @@ trait BootControllers
             | language to use.
             |
             */
-            $currentLocale = array_get(
-                UserPreference::forUser()->get('backend::backend.preferences'),
-                'locale',
-                App::getLocale()
-            );
-            $priceTrad = Lang::get(
-                sprintf('%s.%s::lang.columns.price', $this->author, $this->plugin),
-                [],
-                $currentLocale
-            );
+            $userPreferences = UserPreference::forUser()->get('backend::backend.preferences');
+            $currentLocale = array_get($userPreferences, 'locale', App::getLocale());
+
+            $priceTrad = Lang::get('initbiz.mallimportexport::lang.columns.price', [], $currentLocale);
 
             // Init currency symbol
             $currency = Currency::activeCurrency();
-            $currencySymbol = '';
-            if ($this->useCurrencySymbol === true) {
-                $currencySymbol = $currency->symbol;
-            } elseif ($this->useCurrencySymbol === false) {
-                $currencySymbol = $currency->code;
-            }
+            $currencySymbol = $currency->symbol;
 
-            // Implement behavior if not already implemented
-            if (!$controller->isClassExtendedWith('Backend.Behaviors.ImportExportController')) {
-                $controller->implement[] = 'Backend.Behaviors.ImportExportController';
-            }
 
             // Add views
-            $partials_path = sprintf('$/%s/%s/partials', $this->author, $this->plugin);
-            $controller->addViewPath($partials_path);
+            $controller->addViewPath('initbiz/mallimportexport/partials');
             $controller->vars['lang'] = $currentLocale;
 
             // Add currencies price columns
             $currencies = Currency::orderBy('is_default', 'DESC')->orderBy('sort_order', 'ASC')->get();
-            $currencies->each(function (Currency $currency) use (
-                $importList,
-                $exportList,
-                $priceTrad,
-                $currencySymbol
-            ) {
-                $label = $this->removeDiacritics(sprintf('%s %s', $priceTrad, $currencySymbol));
+            $currencies->each(function (Currency $currency) use ($importList, $exportList, $priceTrad, $currencySymbol) {
+                $label = $this->removeDiacritics(sprintf('%s %s', $priceTrad, $currency->symbol));
 
                 $importList->columns['price__' . $currency->code] = [
                     'label' => $label
                 ];
+
                 $exportList->columns['price__' . $currency->code] = [
                     'label' => $label
                 ];
@@ -114,16 +85,16 @@ trait BootControllers
                     $exportList,
                     $currencySymbol
                 ) {
-                    $label = $this->removeDiacritics($category->name.' '.$currencySymbol);
-                    $importList->columns['additional__'. $category->id .'__'.$currency->code] = [
+                    $label = $this->removeDiacritics($category->name . ' ' . $currencySymbol);
+                    $importList->columns['additional__' . $category->id . '__' . $currency->code] = [
                         'label' => $label
                     ];
-                    $exportList->columns['additional__'. $category->id .'__'.$currency->code] = [
+                    $exportList->columns['additional__' . $category->id . '__' . $currency->code] = [
                         'label' => $label
                     ];
                 });
 
-                // Add custormer's group price columns
+                // Add customer's group price columns
                 $customerGroups = CustomerGroup::orderBy('sort_order', 'ASC')->get();
                 $customerGroups->each(function (CustomerGroup $group) use (
                     $currency,
@@ -132,12 +103,12 @@ trait BootControllers
                     $priceTrad
                 ) {
                     $label = $this->removeDiacritics(
-                        sprintf('%s %s', $priceTrad, strtolower($group->name).' '.$currency->symbol)
+                        sprintf('%s %s', $priceTrad, strtolower($group->name) . ' ' . $currency->symbol)
                     );
-                    $importList->columns['group__' . $group->id .'__'.$currency->code] = [
+                    $importList->columns['group__' . $group->id . '__' . $currency->code] = [
                         'label' => $label,
                     ];
-                    $exportList->columns['group__' . $group->id .'__'.$currency->code] = [
+                    $exportList->columns['group__' . $group->id . '__' . $currency->code] = [
                         'label' => $label,
                     ];
                 });
@@ -148,24 +119,22 @@ trait BootControllers
 
             // Set export file name from config
             $fileName = $config->export['fileName'];
-            $newFileName = Config::get(sprintf('%s.%s::export.fileName', $this->author, $this->plugin, false));
+            $newFileName = Config::get('initbiz.mallimportexport::export.fileName', false);
             if ($newFileName) {
                 $fileName = $newFileName;
             }
+
             // Append date to file name
-            if (Config::get(sprintf('%s.%s::export.appendDate', $this->author, $this->plugin, false))) {
-                $fileName .= (date(Config::get(sprintf('%s.%s::export.dateFormat', $this->author, $this->plugin), '_Y-m-d')));
+            $appendDate = Config::get('initbiz.mallimportexport::export.appendDate', false);
+            if ($appendDate) {
+                $dateFormat = Config::get('initbiz.mallimportexport::export.dateFormat',  '_Y-m-d');
+                $fileName .= (date($dateFormat));
             }
 
-            $config->export['fileName'] = $fileName .'.csv';
+            $config->export['fileName'] = $fileName . '.csv';
 
             // Allow config to be extendable with events
-            Event::fire('hounddd.mallimportexport.config.update', [$controller, $config]);
-
-            // Define property if not already defined
-            if (!isset($controller->importExportConfig)) {
-                $controller->addDynamicProperty('importExportConfig', $config);
-            }
+            Event::fire('initbiz.mallimportexport.config.update', [$controller, $config]);
         });
     }
 
@@ -205,9 +174,8 @@ trait BootControllers
             'þ'=>'b',
             'ß'=>'ss',
         );
-        if ($this->removeDiacritics) {
-            $label = strtr($label, $unwanted_array);
-        }
+
+        $label = strtr($label, $unwanted_array);
 
         return $label;
     }

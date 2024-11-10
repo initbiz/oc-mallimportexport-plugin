@@ -13,12 +13,12 @@
             <div class="toolbar-widget list-header">
                 <div class="control-toolbar">
                 <div class="toolbar-item ">
-                    <?php if ($this->user->hasAccess('hounddd.mallimportexport.import')): ?>
+                    <?php if ($this->user->hasAccess('initbiz.mallimportexport.import')): ?>
                         <a role="button"
                             href="<?= Backend::url('offline/mall/products/import') ?>"
                             class="btn btn-lg btn-success p-x">
                             <i class="icon-cloud-upload"></i>
-                            <?= e(trans('hounddd.mallimportexport::lang.menus.import')) ?>
+                            <?= e(trans('initbiz.mallimportexport::lang.menus.import')) ?>
                         </a>
                     <?php endif ?>
                 </div>
@@ -34,7 +34,7 @@
                     data-handler="onExportLoadForm"
                     data-keyboard="false"
                     class="btn btn-primary">
-                    <?= e(trans('hounddd.mallimportexport::lang.ux.export_button')) ?>
+                    <?= e(trans('initbiz.mallimportexport::lang.ux.export_button')) ?>
                 </button>
             </div>
         </div>
@@ -52,7 +52,7 @@
 <?php else: ?>
 
     <p class="flash-message static error"><?= e($this->fatalError) ?></p>
-    <li><a href="<?= Backend::url('offline/mall/products') ?>"><?= e(trans('hounddd.mallimportexport::lang.ux.return_list')) ?></a></li>
+    <li><a href="<?= Backend::url('offline/mall/products') ?>"><?= e(trans('initbiz.mallimportexport::lang.ux.return_list')) ?></a></li>
 
 <?php endif ?>
 

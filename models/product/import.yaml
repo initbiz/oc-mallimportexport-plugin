@@ -4,12 +4,12 @@
 
 columns:
     user_defined_id:
-        label: 'hounddd.mallimportexport::lang.columns.user_defined_id'
+        label: 'initbiz.mallimportexport::lang.columns.user_defined_id'
     published:
-        label: 'hounddd.mallimportexport::lang.columns.published'
+        label: 'initbiz.mallimportexport::lang.columns.published'
     stock:
-        label: 'hounddd.mallimportexport::lang.columns.stock'
+        label: 'initbiz.mallimportexport::lang.columns.stock'
     allow_out_of_stock_purchases:
-        label: 'hounddd.mallimportexport::lang.columns.allow_out_of_stock_purchases'
+        label: 'initbiz.mallimportexport::lang.columns.allow_out_of_stock_purchases'
     weight:
-        label: 'hounddd.mallimportexport::lang.columns.weight'
+        label: 'initbiz.mallimportexport::lang.columns.weight'

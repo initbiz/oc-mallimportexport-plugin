@@ -1,18 +1,18 @@
-<?php namespace Hounddd\MallImportExport;
+<?php
 
+namespace Initbiz\MallImportExport;
+
+use Event;
 use System\Classes\PluginBase;
-use Hounddd\MallImportExport\Classes\Registration\BootEvents;
-use Hounddd\MallImportExport\Classes\Registration\BootControllers;
 
 /**
  * MallImportExport Plugin Information File
  */
 class Plugin extends PluginBase
 {
-    public $require = ['Offline.Mall'];
-
-    use BootEvents;
-    use BootControllers;
+    public $require = [
+        'Offline.Mall'
+    ];
 
     /**
      * Returns information about this plugin.
@@ -22,11 +22,10 @@ class Plugin extends PluginBase
     public function pluginDetails()
     {
         return [
-            'name'        => 'hounddd.mallimportexport::lang.plugin.name',
-            'description' => 'hounddd.mallimportexport::lang.plugin.description',
-            'author'      => 'Hounddd',
+            'name'        => 'initbiz.mallimportexport::lang.plugin.name',
+            'description' => 'initbiz.mallimportexport::lang.plugin.description',
+            'author'      => 'Initbiz',
             'icon'        => 'icon-retweet',
-            'homepage'    => 'https://github.com/Hounddd/wn-mallimportexport-plugin',
         ];
     }
 
@@ -37,8 +36,8 @@ class Plugin extends PluginBase
      */
     public function boot()
     {
-        $this->registerEvents();
-        $this->registerControllers();
+        Event::subscribe(\Initbiz\MallImportExport\EventHandlers\BackendHandler::class);
+        Event::subscribe(\Initbiz\MallImportExport\EventHandlers\OfflineMallHandler::class);
     }
 
     /**
@@ -49,13 +48,13 @@ class Plugin extends PluginBase
     public function registerPermissions()
     {
         return [
-            'hounddd.mallimportexport.import' => [
+            'initbiz.mallimportexport.import' => [
                 'tab' => 'Mall Import/Export',
-                'label' => 'hounddd.mallimportexport::lang.permissions.import'
+                'label' => 'initbiz.mallimportexport::lang.permissions.import'
             ],
-            'hounddd.mallimportexport.export' => [
+            'initbiz.mallimportexport.export' => [
                 'tab' => 'Mall Import/Export',
-                'label' => 'hounddd.mallimportexport::lang.permissions.export'
+                'label' => 'initbiz.mallimportexport::lang.permissions.export'
             ],
         ];
     }
