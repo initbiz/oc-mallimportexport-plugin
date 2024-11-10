@@ -1,6 +1,6 @@
 # Mall Import/Export
 
-Forked from [Initbiz/wn-mallimportexport-plugin](https://github.com/Initbiz/wn-mallimportexport-plugin) and adjusted to match newest October CMS Mall installation.
+Forked from [Hounddd/wn-mallimportexport-plugin](https://github.com/hounddd/wn-mallimportexport-plugin) and adjusted to match newest October CMS Mall installation.
 
 This plugin offers the possibility to import or export data into the [OFFLINE.Mall](https://github.com/OFFLINE-GmbH/oc-mall-plugin) plugin.
 
