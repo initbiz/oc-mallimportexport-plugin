@@ -12,6 +12,20 @@ class ExportProductsJob
 {
     public function fire(Job $job, $data)
     {
+        try {
+            $this->handle($data);
+        } catch (\Throwable $th) {
+            Cache::decrement(ImportExportProducts::EXPORT_FILE_CACHE_KEY);
+            throw $th;
+        }
+
+        Cache::decrement(ImportExportProducts::EXPORT_FILE_CACHE_KEY);
+
+        $job->delete();
+    }
+
+    public function handle(array $data)
+    {
         $columns = $data['columns'];
         $exportOptions = $data['exportOptions'];
         $optionData = $data['optionData'];
@@ -37,10 +51,22 @@ class ExportProductsJob
         }
 
         $filePath = temp_path('products.' . $extension);
+
+        // Keep the contents
+        if (file_exists($filePath)) {
+            if ($extension === 'json') {
+                $oldContentParsed = json_decode(file_get_contents($filePath), true);
+                if (is_array($oldContentParsed)) {
+                    $currentContentParsed = json_decode($content, true);
+                    $content = json_encode(array_merge($oldContentParsed, $currentContentParsed));
+                }
+            } elseif ($extension === 'csv') {
+                $offset = strpos($content, "\n");
+                $content = substr($content, $offset);
+            }
+        }
+
+        $content = rtrim($content);
         file_put_contents($filePath, $content, FILE_APPEND | LOCK_EX);
-
-        Cache::decrement(ImportExportProducts::EXPORT_FILE_CACHE_KEY);
-
-        $job->delete();
     }
 }

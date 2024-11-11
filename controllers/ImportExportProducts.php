@@ -6,6 +6,7 @@ use Cache;
 use Queue;
 use Config;
 use Backend;
+use Response;
 use Redirect;
 use BackendMenu;
 use Backend\Classes\Controller;
@@ -16,9 +17,11 @@ class ImportExportProducts extends Controller
 {
     public const EXPORT_FILE_CACHE_KEY = 'initbiz.mallimportexport.export-ongoing';
 
+    public const EXPORT_FILE_NAME = 'products_export';
+
     public const EXPORT_FILENAMES = [
-        "products.csv",
-        "products.json",
+        self::EXPORT_FILE_NAME . ".csv",
+        self::EXPORT_FILE_NAME . ".json",
     ];
 
     public $implement = [
@@ -40,15 +43,18 @@ class ImportExportProducts extends Controller
             return;
         }
 
-        $file = '';
+        $filename = '';
         foreach (self::EXPORT_FILENAMES as $filename) {
             $filepath = temp_path($filename);
             if (file_exists($filepath)) {
                 $file = $filepath;
+                $parts = explode('/', $file);
+                $filename = array_pop($parts);
+                break;
             }
         }
 
-        $this->vars['file'] = $file;
+        $this->vars['file'] = $filename;
         $this->vars['exportOngoing'] = Cache::get(self::EXPORT_FILE_CACHE_KEY);
     }
 
@@ -64,9 +70,37 @@ class ImportExportProducts extends Controller
         return Redirect::to($url);
     }
 
+    public function download()
+    {
+        $file = '';
+        foreach (self::EXPORT_FILENAMES as $filename) {
+            $filepath = temp_path($filename);
+            if (file_exists($filepath)) {
+                $file = $filepath;
+                break;
+            }
+        }
+
+        if (empty($file)) {
+            $url = Backend::url("initbiz/mallimportexport/importexportproducts/export");
+            return Redirect::to($url);
+        }
+
+        $parts = explode('/', $file);
+        $filename = array_pop($parts);
+
+        $contentType = ends_with($filename, 'json')
+            ? 'application/json'
+            : 'text/csv';
+
+        return Response::download($file, $filename, [
+            'Content-Type' => $contentType,
+        ]);
+    }
+
     public function importExportGetFileName()
     {
-        return "products";
+        return self::EXPORT_FILE_NAME;
     }
 
     public function onExport(?array $data = [])
@@ -87,7 +121,8 @@ class ImportExportProducts extends Controller
                 unlink($filepath);
             }
         }
-        Cache::put(self::EXPORT_FILE_CACHE_KEY, '0', 3600);
+
+        Cache::put(self::EXPORT_FILE_CACHE_KEY, 0, 600);
 
         $columns = [];
         $definedColumns = $data['export_columns'] ?? [];
@@ -100,7 +135,7 @@ class ImportExportProducts extends Controller
         $exportOptions = $this->getFormatOptionsForModel();
         $exportOptions['sessionKey'] = $data['_session_key'] ?? null;
 
-        Product::select('id')->chunk(1, function ($products) use ($columns, $exportOptions, $optionData) {
+        Product::select('id')->chunk(200, function ($products) use ($columns, $exportOptions, $optionData) {
             Cache::increment(self::EXPORT_FILE_CACHE_KEY);
             Queue::push(ExportProductsJob::class, [
                 'columns' => $columns,
@@ -108,8 +143,6 @@ class ImportExportProducts extends Controller
                 'optionData' => $optionData,
                 'ids' => $products->pluck('id')->toArray(),
             ]);
-
-            return false;
         });
 
         return $this->makePartial('export_form_queue');
