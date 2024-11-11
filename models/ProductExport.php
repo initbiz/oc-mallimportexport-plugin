@@ -2,11 +2,14 @@
 
 namespace Initbiz\MallImportExport\Models;
 
+use Config;
 use Backend;
 use Cms\Classes\Page;
+use Cms\Classes\Theme;
 use OFFLINE\Mall\Models\Product;
 use OFFLINE\Mall\Models\Variant;
 use OFFLINE\Mall\Models\Currency;
+use October\Rain\Database\Collection;
 use OFFLINE\Mall\Models\GeneralSettings;
 
 class ProductExport extends \Backend\Models\ExportModel
@@ -47,11 +50,6 @@ class ProductExport extends \Backend\Models\ExportModel
      */
     protected $cmsPage;
 
-    /**
-     * Product page
-     *
-     * @var Page
-     */
     protected $castAsBolean = [
         'published',
         'allow_out_of_stock_purchases',
@@ -67,7 +65,8 @@ class ProductExport extends \Backend\Models\ExportModel
         $this->defaultCurrency = Currency::where('is_default', true)->first();
 
         $this->productPage    = GeneralSettings::get('product_page', 'product');
-        $this->cmsPage = Page::loadCached(config('cms.activeTheme'), $this->productPage);
+        $theme = Theme::getActiveTheme();
+        $this->cmsPage = Page::loadCached($theme, $this->productPage);
     }
 
     /**
@@ -90,31 +89,35 @@ class ProductExport extends \Backend\Models\ExportModel
         $columns[] = 'additional_prices';
         $columns[] = 'customer_group_prices';
 
-        $productsWithVariants = Product::with([
+        $records = new Collection();
+
+        $currentLimit = ini_get('max_execution_time');
+        $newLimit = Config::get('initbiz.mallimportexport::max_execution_time', 3600);
+        set_time_limit($newLimit);
+        Product::with([
             'prices',
             'additional_prices',
             'customer_group_prices',
             'variants.customer_group_prices',
             'variants.additional_prices',
-        ])
-            ->get();
+        ])->take(20)
+            ->chunk(20, function (Collection $products) use ($records) {
+                foreach ($products as $product) {
+                    if (!(bool)$this->only_variants || $product->inventory_management_method === 'single') {
+                        $records = $records->push($product);
+                    }
+                    if ($product->inventory_management_method === 'variant') {
+                        foreach ($product->variants as $variant) {
+                            $records = $records->push($variant);
+                        }
+                    }
+                }
+            });
 
-        $products = collect();
-
-        // Reorder variants just after their parent product
-        $productsWithVariants->each(function ($product, $key) use ($products) {
-            if (! (bool)$this->only_variants || $product->inventory_management_method === 'single') {
-                $products->push($product);
-            }
-            if ($product->inventory_management_method === 'variant') {
-                $product->variants->each(function ($item) use ($products) {
-                    $products->push($item);
-                });
-            }
-        });
+        set_time_limit($currentLimit);
 
         // Add other prices
-        $products = $products->map(function ($product) {
+        $products = $records->map(function ($product) {
             return $this->addOtherPrices($product);
         });
 
@@ -162,14 +165,17 @@ class ProductExport extends \Backend\Models\ExportModel
         foreach ($product->prices as $key => $price) {
             $product['price__' . $price->currency->code] = $this->formatedPriceNoSymbol($price->toArray());
         }
+
         foreach ($product->additional_prices as $key => $price) {
             $name = 'additional__' . $price->price_category_id . '__' . $price->currency->code;
             $product[$name] = $this->formatedPriceNoSymbol($price->toArray());
         }
+
         foreach ($product->customer_group_prices as $key => $price) {
             $name = 'group__' . $price->customer_group_id . '__' . $price->currency->code;
             $product[$name] = $this->formatedPriceNoSymbol($price->toArray());
         }
+
         return $product;
     }
 

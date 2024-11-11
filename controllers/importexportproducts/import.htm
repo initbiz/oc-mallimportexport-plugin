@@ -10,31 +10,25 @@
     <?php Block::put('form-contents') ?>
         <div class="layout-row">
 
-            <div class="toolbar-widget list-header">
-                <div class="control-toolbar">
-                <div class="toolbar-item ">
-                    <?php if ($this->user->hasAccess('initbiz.mallimportexport.import')): ?>
-                        <a role="button"
-                            href="<?= Backend::url('offline/mall/products/import') ?>"
-                            class="btn btn-lg btn-success p-x">
-                            <i class="icon-cloud-upload"></i>
-                            <?= e(trans('initbiz.mallimportexport::lang.menus.import')) ?>
-                        </a>
-                    <?php endif ?>
-                </div>
-                </div>
-            </div>
+            <?php
+            $requiredFields = '';
+            collect(array_where($this->vars['importUploadFormWidget']->model->rules, function ($value, $key) {
+                return $value == 'required';
+            }))->map(function ($item, $key) use (&$requiredFields) {
+                $requiredFields .= '<li>'. trans('initbiz.mallimportexport::lang.columns.'. $key) .'</li>';
+            })
+            ?>
 
-            <?= $this->exportRender() ?>
+            <?= $this->importRender() ?>
 
             <div class="form-buttons">
                 <button
                     type="submit"
                     data-control="popup"
-                    data-handler="onExportLoadForm"
+                    data-handler="onImportLoadForm"
                     data-keyboard="false"
                     class="btn btn-primary">
-                    <?= e(trans('initbiz.mallimportexport::lang.ux.export_button')) ?>
+                    <?= e(trans('initbiz.mallimportexport::lang.ux.import_button')) ?>
                 </button>
             </div>
         </div>
@@ -42,7 +36,7 @@
 
 
     <?php Block::put('body') ?>
-        <?= Form::open(['class'=>'layout']) ?>
+        <?= Form::open(['class'=>'layout stretch']) ?>
 
             <?= Block::placeholder('form-contents') ?>
 

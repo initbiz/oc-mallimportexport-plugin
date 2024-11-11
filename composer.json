@@ -5,6 +5,7 @@
     "license": "MIT",
     "require": {
         "composer/installers": "~1.0",
+        "october/system": "^3.1",
         "offline/oc-mall-plugin": "^3.5"
     }
 }

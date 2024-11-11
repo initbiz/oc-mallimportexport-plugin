@@ -8,6 +8,7 @@ use Event;
 use Config;
 use OFFLINE\Mall\Models\Currency;
 use Backend\Models\UserPreference;
+use October\Rain\Events\Dispatcher;
 use OFFLINE\Mall\Controllers\Products;
 use OFFLINE\Mall\Models\CustomerGroup;
 use OFFLINE\Mall\Models\PriceCategory;
@@ -21,7 +22,7 @@ class OfflineMallHandler
         }
     }
 
-    protected function extendMallProduct(Event $event)
+    protected function extendMallProduct(Dispatcher $event)
     {
         Products::extend(function ($controller) {
             if (!$controller->isClassExtendedWith('Backend.Behaviors.ImportExportController')) {
@@ -29,10 +30,6 @@ class OfflineMallHandler
             }
 
             $config = $controller->makeConfig('$/initbiz/mallimportexport/config/product_import_export.yaml');
-
-            if (!isset($controller->importExportConfig)) {
-                $controller->addDynamicProperty('importExportConfig', $config);
-            }
 
             $importList = $controller->makeConfig($config->import['list']);
             $exportList = $controller->makeConfig($config->export['list']);
@@ -58,7 +55,6 @@ class OfflineMallHandler
             // Init currency symbol
             $currency = Currency::activeCurrency();
             $currencySymbol = $currency->symbol;
-
 
             // Add views
             $controller->addViewPath('initbiz/mallimportexport/partials');
@@ -132,6 +128,10 @@ class OfflineMallHandler
             }
 
             $config->export['fileName'] = $fileName . '.csv';
+
+            if (!isset($controller->importExportConfig)) {
+                $controller->addDynamicProperty('importExportConfig', $config);
+            }
 
             // Allow config to be extendable with events
             Event::fire('initbiz.mallimportexport.config.update', [$controller, $config]);

@@ -1,0 +1,39 @@
+<?php Block::put('breadcrumb') ?>
+    <ul>
+        <li><a href="<?= Backend::url('offline/mall/products') ?>"><?= e(trans('offline.mall::lang.menu_items.all_products')) ?></a></li>
+        <li><?= e($this->pageTitle) ?></li>
+    </ul>
+<?php Block::endPut() ?>
+
+<?php if (!$this->fatalError): ?>
+
+    <?php Block::put('form-contents') ?>
+        <div class="layout-row">
+            <?= $this->exportRender() ?>
+
+            <div class="form-buttons">
+                <button
+                    type="submit"
+                    data-control="popup"
+                    data-handler="onExportLoadForm"
+                    data-keyboard="false"
+                    class="btn btn-primary">
+                    <?= e(trans('initbiz.mallimportexport::lang.ux.export_button')) ?>
+                </button>
+            </div>
+        </div>
+    <?php Block::endPut() ?>
+
+    <?php Block::put('body') ?>
+        <?= Form::open(['class'=>'layout']) ?>
+            <?= Block::placeholder('form-contents') ?>
+        <?= Form::close() ?>
+    <?php Block::endPut() ?>
+
+<?php else: ?>
+
+    <p class="flash-message static error"><?= e($this->fatalError) ?></p>
+    <li><a href="<?= Backend::url('offline/mall/products') ?>"><?= e(trans('initbiz.mallimportexport::lang.ux.return_list')) ?></a></li>
+
+<?php endif ?>
+
