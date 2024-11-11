@@ -6,15 +6,14 @@ import:
     title: 'initbiz.mallimportexport::lang.import.title'
     modelClass: Initbiz\MallImportExport\Models\ProductImport
     list: $/initbiz/mallimportexport/models/product/import.yaml
-    redirect: offline/mall/products
+    redirect: initbiz/mallimportexport/importexportproducts/import
 
 export:
     title: 'initbiz.mallimportexport::lang.export.title'
     modelClass: Initbiz\MallImportExport\Models\ProductExport
     list: $/initbiz/mallimportexport/models/product/export.yaml
     form: $/initbiz/mallimportexport/models/product/export_fields.yaml
-    redirect: offline/mall/products
-    fileName: 'products_export.csv'
+    redirect: initbiz/mallimportexport/importexportproducts/export
 
 defaultFormatOptions:
     delimiter: ';'

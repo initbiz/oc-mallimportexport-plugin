@@ -1,14 +1,14 @@
 # Mall Import/Export
 
-Forked from [Hounddd/wn-mallimportexport-plugin](https://github.com/hounddd/wn-mallimportexport-plugin) and adjusted to match newest October CMS Mall installation.
+Forked from [Hounddd/wn-mallimportexport-plugin](https://github.com/hounddd/wn-mallimportexport-plugin).
 
-This plugin offers the possibility to import or export data into the [OFFLINE.Mall](https://github.com/OFFLINE-GmbH/oc-mall-plugin) plugin.
+It was adjusted to match newest October CMS Mall installation and to handle over 40k variants.
 
----
+It's not a production ready plugin, PRs are welcomed.
 
-⚠ **Please note that it does NOT allow you to add products but to update existing products**.
+This plugin lets you export data from [OFFLINE.Mall](https://github.com/OFFLINE-GmbH/oc-mall-plugin) plugin.
 
----
+Importing wasn't tested.
 
 ## What you can import or export
 

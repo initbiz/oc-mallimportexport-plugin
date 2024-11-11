@@ -16,10 +16,6 @@ return [
 
     'import' => [
         'title' => 'Updating shop’s data',
-        'hint_title' => 'Help with importing data into the shop',
-        'hint_content_left' => '<p>Export your data in CSV format (from Microsoft Excel, ' .
-                                'File > Save as, then choose the CSV UTF-8 format).</p>',
-        'hint_content_right' => '<p>The following data fields are required:</p><ul>:fields</ul>',
         'errors' => [
             'emptyline' => 'The line is empty',
             'notaproduct' => 'The product :ref does not correspond to any product or variant.',
@@ -35,6 +31,8 @@ return [
 
     'columns' => [
         'allow_out_of_stock_purchases' => 'Sale out of stock',
+        'name' => 'Name',
+        'description' => 'Description',
         'price' => 'Price',
         'published' => 'Published',
         'stock' => 'Stock',
@@ -54,5 +52,9 @@ return [
         'export_admin_links' => 'Export link to product’s backend',
         'export_admin_links_comment' => 'a link to the edit product page is added',
         'return_list' => 'Back to the product list',
+        'export_success_message' => 'File is being generated. Refresh the page in a minute to download it.',
+        'generated_file_label' => 'Most recently generated file:',
+        'refresh_page' => 'Refresh page',
+        'export_ongoing' => 'Exporting records is in progress. Wait for the file to be generated.',
     ],
 ];

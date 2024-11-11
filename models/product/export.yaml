@@ -3,6 +3,10 @@
 # ===================================
 
 columns:
+    name:
+        label: 'initbiz.mallimportexport::lang.columns.name'
+    description:
+        label: 'initbiz.mallimportexport::lang.columns.description'
     user_defined_id:
         label: 'initbiz.mallimportexport::lang.columns.user_defined_id'
     published:

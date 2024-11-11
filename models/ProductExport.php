@@ -6,13 +6,15 @@ use Config;
 use Backend;
 use Cms\Classes\Page;
 use Cms\Classes\Theme;
+use Backend\Models\ExportModel;
 use OFFLINE\Mall\Models\Product;
 use OFFLINE\Mall\Models\Variant;
 use OFFLINE\Mall\Models\Currency;
-use October\Rain\Database\Collection;
 use OFFLINE\Mall\Models\GeneralSettings;
+use October\Rain\Database\Collection;
+use October\Rain\Exception\ApplicationException;
 
-class ProductExport extends \Backend\Models\ExportModel
+class ProductExport extends ExportModel
 {
     public $requiredPermissions = ['initbiz.mallimportexport.export'];
 
@@ -21,6 +23,13 @@ class ProductExport extends \Backend\Models\ExportModel
         'link',
         'admin_link',
     ];
+
+    /**
+     * Columns
+     *
+     * @var array
+     */
+    protected $columns = [];
 
     /**
      * List of available currencies
@@ -50,13 +59,15 @@ class ProductExport extends \Backend\Models\ExportModel
      */
     protected $cmsPage;
 
-    protected $castAsBolean = [
+    /**
+     * Product page
+     *
+     * @var Page
+     */
+    protected $castAsBoolean = [
         'published',
         'allow_out_of_stock_purchases',
     ];
-
-    private $exportLink = false;
-    private $exportAdminLink = false;
 
     public function __construct(array $attributes = [])
     {
@@ -64,7 +75,7 @@ class ProductExport extends \Backend\Models\ExportModel
         $this->currencies = Currency::orderBy('is_default', 'DESC')->orderBy('sort_order', 'ASC')->get();
         $this->defaultCurrency = Currency::where('is_default', true)->first();
 
-        $this->productPage    = GeneralSettings::get('product_page', 'product');
+        $this->productPage = GeneralSettings::get('product_page', 'product');
         $theme = Theme::getActiveTheme();
         $this->cmsPage = Page::loadCached($theme, $this->productPage);
     }
@@ -74,84 +85,134 @@ class ProductExport extends \Backend\Models\ExportModel
      */
     protected function exportExtendColumns($columns)
     {
-        if ($this->exportLink) {
-            $columns['link'] = 'initbiz.mallimportexport::lang.columns.link';
-        }
-        if ($this->exportAdminLink) {
-            $columns['admin_link'] = 'initbiz.mallimportexport::lang.columns.admin_link';
-        }
-        return $columns;
-    }
+        $this->columns = array_merge($columns, $this->columns);
 
+        if ($this->link) {
+            $this->columns['link'] = 'initbiz.mallimportexport::lang.columns.link';
+        }
+
+        if ($this->admin_link) {
+            $this->columns['admin_link'] = 'initbiz.mallimportexport::lang.columns.admin_link';
+        }
+
+        return $this->columns;
+    }
 
     public function exportData($columns, $sessionKey = null)
     {
-        $columns[] = 'additional_prices';
-        $columns[] = 'customer_group_prices';
-
-        $records = new Collection();
-
-        $currentLimit = ini_get('max_execution_time');
-        $newLimit = Config::get('initbiz.mallimportexport::max_execution_time', 3600);
-        set_time_limit($newLimit);
-        Product::with([
+        $products = Product::with([
             'prices',
             'additional_prices',
             'customer_group_prices',
             'variants.customer_group_prices',
             'variants.additional_prices',
-        ])->take(20)
-            ->chunk(20, function (Collection $products) use ($records) {
-                foreach ($products as $product) {
-                    if (!(bool)$this->only_variants || $product->inventory_management_method === 'single') {
-                        $records = $records->push($product);
-                    }
-                    if ($product->inventory_management_method === 'variant') {
-                        foreach ($product->variants as $variant) {
-                            $records = $records->push($variant);
-                        }
-                    }
+        ])->take(1)->get();
+
+        return $this->processProducts($products);
+    }
+
+    public function processExportData($columns, $results, $options)
+    {
+        // Validate
+        if (!$results) {
+            throw new ApplicationException(__("There was no data supplied to export"));
+        }
+
+        // Extend columns
+        $columns = $this->exportExtendColumns($columns);
+
+        // Save for download
+        $fileName = uniqid('oc');
+
+        $queueEnabled = Config::get('initbiz.mallimportexport::export_queue.enabled');
+
+        // Prepare export
+        if ($this->file_format === 'json') {
+            $fileName .= 'xjson';
+            if (!$queueEnabled) {
+                $options['savePath'] = $this->getTemporaryExportPath($fileName);
+            }
+            $output = $this->processExportDataAsJson($columns, $results, $options);
+        }
+        else {
+            $fileName .= 'xcsv';
+            if (!$queueEnabled) {
+                $options['savePath'] = $this->getTemporaryExportPath($fileName);
+            }
+            $output = $this->processExportDataAsCsv($columns, $results, $options);
+        }
+
+        if ($queueEnabled) {
+            return $output;
+        }
+
+        return $fileName;
+    }
+
+    public function processProducts(Collection $products): array
+    {
+        $processedProducts = [];
+
+        foreach ($products as $product) {
+            if (! (bool)$this->only_variants || $product->inventory_management_method === 'single') {
+                $processedProducts[] = $this->processProduct($product);
+            }
+            if ($product->inventory_management_method === 'variant') {
+                foreach ($product->variants as $variant) {
+                    $processedProducts[] = $this->processProduct($variant);
                 }
-            });
+            }
+        }
 
-        set_time_limit($currentLimit);
+        return $processedProducts;
+    }
 
-        // Add other prices
-        $products = $records->map(function ($product) {
-            return $this->addOtherPrices($product);
-        });
+    protected function processProduct($product): array
+    {
+        $product = $this->emptyToFalse($product);
+        $product = $this->encodeArrays($product);
+
+        $productArray = $product->toArray();
+
+        foreach ($product->prices as $key => $price) {
+            $columnName = 'price__' . $price->currency->code;
+            if (!isset($this->columns[$columnName])) {
+                $this->columns[$columnName] = $columnName;
+            }
+            $productArray[$columnName] = $price->integer;
+        }
+
+        foreach ($product->additional_prices as $key => $price) {
+            $columnName = 'additional__' . $price->price_category_id . '__' . $price->currency->code;
+            if (!isset($this->columns[$columnName])) {
+                $this->columns[$columnName] = $columnName;
+            }
+            $productArray[$columnName] = $price->integer;
+        }
+        foreach ($product->customer_group_prices as $key => $price) {
+            $columnName = 'group__' . $price->customer_group_id . '__' . $price->currency->code;
+            if (!isset($this->columns[$columnName])) {
+                $this->columns[$columnName] = $columnName;
+            }
+            $productArray[$columnName] = $price->integer;
+        }
 
         // Add public link to product
-        if ($this->link) {
-            $this->exportLink = true;
-            $columns[] = 'link';
-            $products = $products->map(function ($product) {
-                return $this->addLink($product);
-            });
+        if ($this->link && $this->cmsPage) {
+            $pageUrl = \Cms::pageUrl($this->cmsPage->getBaseFileName(), ['slug' => $product->slug]);
+            $productArray['link'] = $pageUrl;
         }
 
         // Add admin link to product
         if ($this->admin_link) {
-            $this->exportAdminLink = true;
-            $columns[] = 'admin_link';
-            $products = $products->map(function ($product) {
-                return $this->addAdminLink($product);
-            });
+            $productId = $product->id;
+            if ($product instanceof Variant) {
+                $productId = $product->product->id;
+            }
+            $productArray['admin_link'] = Backend::url('offline/mall/products/update/' . $productId);
         }
 
-        $products = $products->each(function ($product) use ($columns) {
-            $product->addVisible($columns);
-        });
-
-        $collection = collect($products->toArray());
-        $collection = $collection->map(function ($item) {
-            return $this->emptyToFalse($item);
-        });
-        $data = $collection->map(function ($item) {
-            return $this->encodeArrays($item);
-        });
-
-        return $data->toArray();
+        return $productArray;
     }
 
     /**
@@ -162,52 +223,6 @@ class ProductExport extends \Backend\Models\ExportModel
      */
     protected function addOtherPrices($product)
     {
-        foreach ($product->prices as $key => $price) {
-            $product['price__' . $price->currency->code] = $this->formatedPriceNoSymbol($price->toArray());
-        }
-
-        foreach ($product->additional_prices as $key => $price) {
-            $name = 'additional__' . $price->price_category_id . '__' . $price->currency->code;
-            $product[$name] = $this->formatedPriceNoSymbol($price->toArray());
-        }
-
-        foreach ($product->customer_group_prices as $key => $price) {
-            $name = 'group__' . $price->customer_group_id . '__' . $price->currency->code;
-            $product[$name] = $this->formatedPriceNoSymbol($price->toArray());
-        }
-
-        return $product;
-    }
-
-    /**
-     * Add link property to product's page
-     *
-     * @param Product $product
-     * @return Product
-     */
-    protected function addLink($product)
-    {
-        if ($this->cmsPage) {
-            $pageUrl = $this->cmsPage->url($this->productPage, ['slug' => $product->slug]);
-            $product['link'] = $pageUrl;
-        }
-
-        return $product;
-    }
-
-    /**
-     * Add admin_link property to product's edit page
-     *
-     * @param Product $product
-     * @return Product
-     */
-    protected function addAdminLink($product)
-    {
-        $productId = $product->id;
-        if ($product instanceof Variant) {
-            $productId = $product->product->id;
-        }
-        $product['admin_link'] = Backend::url('offline/mall/products/update/' . $productId);
         return $product;
     }
 
@@ -217,7 +232,7 @@ class ProductExport extends \Backend\Models\ExportModel
      * @param array $price
      * @return string
      */
-    protected function formatedPriceNoSymbol($price)
+    protected function formatPriceNoSymbol($price)
     {
         return trim(str_replace(
             $price['currency']['symbol'],
@@ -235,7 +250,7 @@ class ProductExport extends \Backend\Models\ExportModel
     protected function emptyToFalse($item)
     {
         if (is_array($item)) {
-            foreach ($this->castAsBolean as $key => $attribute) {
+            foreach ($this->castAsBoolean as $key => $attribute) {
                 $item[$attribute] = array_get($item, $attribute, 0) == 1 ?: 0;
             }
         }
