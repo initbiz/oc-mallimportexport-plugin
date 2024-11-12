@@ -56,6 +56,10 @@ class Plugin extends PluginBase
                 'tab' => 'Mall Import/Export',
                 'label' => 'initbiz.mallimportexport::lang.permissions.export'
             ],
+            'initbiz.mallimportexport.export_orders' => [
+                'tab' => 'Mall Import/Export',
+                'label' => 'initbiz.mallimportexport::lang.permissions.export_orders'
+            ],
         ];
     }
 }

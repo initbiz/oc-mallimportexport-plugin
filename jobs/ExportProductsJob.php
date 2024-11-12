@@ -50,7 +50,7 @@ class ExportProductsJob
             $extension = 'csv';
         }
 
-        $filePath = temp_path('products.' . $extension);
+        $filePath = temp_path(ImportExportProducts::EXPORT_FILE_NAME . '.' . $extension);
 
         // Keep the contents
         if (file_exists($filePath)) {

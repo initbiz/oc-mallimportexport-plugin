@@ -1,0 +1,7 @@
+# ===================================
+#  Export Column Definitions
+# ===================================
+
+columns:
+    order_number:
+        label: initbiz.mallimportexport::lang.order.order_number

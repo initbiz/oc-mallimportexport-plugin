@@ -8,10 +8,17 @@ return [
         'author' => 'Initbiz'
     ],
 
+    'permissions' => [
+        'import' => 'Import produktów',
+        'export' => 'Eksport produktów',
+        'export_orders' => 'Eksport zamówień',
+    ],
+
     'menus' => [
         'importexport' => 'Import lub eksport',
-        'import' => 'Import danych',
-        'export' => 'Eksport danych',
+        'import' => 'Import produktów',
+        'export' => 'Eksport produktów',
+        'export_orders' => 'Eksport zamówień',
     ],
 
     'import' => [
@@ -27,6 +34,10 @@ return [
 
     'export' => [
         'title' => 'Eksport danych sklepu',
+    ],
+
+    'export_orders' => [
+        'title' => 'Eksport zamówień',
     ],
 
     'columns' => [

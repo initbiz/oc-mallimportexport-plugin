@@ -1,0 +1,57 @@
+columns:
+    id:
+        label: ID
+
+    hash_id:
+        label: Hash ID
+
+    currency:
+        label: currency
+
+    firstname:
+        label: firstname
+
+    lastname:
+        label: lastname
+
+    email:
+        label: email
+
+    billing_address:
+        label: billing_address
+
+    shipping_address:
+        label: shipping_address
+
+    tracking_number:
+        label: tracking_number
+
+    tracking_url:
+        label: tracking_url
+
+    total_pre_taxes:
+        label: total_pre_taxes
+
+    total_post_taxes:
+        label: total_post_taxes
+
+    total_weight:
+        label: total_weight
+
+    notes:
+        label: notes
+
+    discounts:
+        label: discounts
+
+    ip_address:
+        label: ip_address
+
+    payment_method:
+        label: payment_method
+
+    created_at:
+        label: created_at
+
+    order_state_label:
+        label: order_state

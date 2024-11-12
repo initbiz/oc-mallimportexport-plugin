@@ -32,6 +32,13 @@ class BackendHandler
                     'url'         => Backend::url('initbiz/mallimportexport/importexportproducts/export'),
                     'permissions' => ['initbiz.mallimportexport.export'],
                     'order'       => '801',
+                ],
+                'export-orders' => [
+                    'label'       => 'initbiz.mallimportexport::lang.menus.export_orders',
+                    'icon'        => 'icon-cloud-upload',
+                    'url'         => Backend::url('initbiz/mallimportexport/exportorders'),
+                    'permissions' => ['initbiz.mallimportexport.export_orders'],
+                    'order'       => '802',
                 ]
             ];
 

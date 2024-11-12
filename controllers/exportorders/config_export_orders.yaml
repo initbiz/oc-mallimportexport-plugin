@@ -1,0 +1,15 @@
+# ===================================
+#  Import/Export Behavior Config
+# ===================================
+
+export:
+    title: 'initbiz.mallimportexport::lang.export_orders.title'
+    modelClass: Initbiz\MallImportExport\Models\OrderExport
+    list: $/initbiz/mallimportexport/models/order/export_columns.yaml
+    redirect: initbiz/mallimportexport/importexportproducts/exportorders
+
+defaultFormatOptions:
+    delimiter: ';'
+    enclosure: '"'
+    escape: '\'
+    encoding: 'utf-8'
