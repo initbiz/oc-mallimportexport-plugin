@@ -106,7 +106,7 @@ class ProductExport extends ExportModel
             'customer_group_prices',
             'variants.customer_group_prices',
             'variants.additional_prices',
-        ])->take(1)->get();
+        ])->get();
 
         return $this->processProducts($products);
     }

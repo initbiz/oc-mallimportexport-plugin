@@ -2,15 +2,15 @@
 
     <div class="modal-body">
         <p>
-            <?= e(trans('initbiz.mallimportexport::lang.ux.export_button')) ?>
+            <?= e(trans('initbiz.mallimportexport::lang.ux.export_queue_message')) ?>
         </p>
     </div>
     <div class="modal-footer">
         <button
             type="button"
             class="btn btn-secondary"
-            data-dismiss="popup">
-            <?= __("Close") ?>
+            onclick="location.reload();">
+            <?= e(trans('initbiz.mallimportexport::lang.ux.export_queue_success_button')) ?>
         </button>
     </div>
 

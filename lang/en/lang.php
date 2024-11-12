@@ -56,5 +56,7 @@ return [
         'generated_file_label' => 'Most recently generated file:',
         'refresh_page' => 'Refresh page',
         'export_ongoing' => 'Exporting records is in progress. Wait for the file to be generated.',
+        'export_queue_message' => 'File generation started, please refresh the page soon to download it.',
+        'export_queue_success_button' => 'Close',
     ],
 ];

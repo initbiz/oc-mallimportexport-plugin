@@ -9,27 +9,6 @@
 
     <?php Block::put('form-contents') ?>
         <div class="layout-row">
-            <?php if ($exportQueueEnabled && $file): ?>
-            <div class="form-group">
-                <div class="field-section">
-                    <h4>
-                        <?= e(trans('initbiz.mallimportexport::lang.ux.generated_file_label')) ?>
-                    </h4>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="form-tabless-fields">
-                    <a
-                        href="<?= \Backend::url('initbiz/mallimportexport/importexportproducts/download') ?>"
-                        download="<?= $file ?>"
-                        data-keyboard="false"
-                        class="btn btn-primary">
-                        <?= $file ?>
-                    </a>
-                </div>
-            </div>
-            <?php endif; ?>
-
             <?php if ($exportQueueEnabled && $exportOngoing): ?>
                 <div class="form-group">
                     <div class="field-section">
@@ -47,6 +26,27 @@
                     </button>
                 </div>
             <?php else: ?>
+                <?php if (isset($file) && !empty($file)): ?>
+                    <div class="form-group">
+                        <div class="field-section">
+                            <h4>
+                                <?= e(trans('initbiz.mallimportexport::lang.ux.generated_file_label')) ?>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-tabless-fields">
+                            <a
+                                href="<?= \Backend::url('initbiz/mallimportexport/importexportproducts/download') ?>"
+                                download="<?= $file ?>"
+                                data-keyboard="false"
+                                class="btn btn-primary">
+                                <?= $file ?>
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <?= $this->exportRender() ?>
 
                 <div class="form-buttons">

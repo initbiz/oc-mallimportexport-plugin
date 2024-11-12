@@ -44,8 +44,8 @@ class ImportExportProducts extends Controller
         }
 
         $filename = '';
-        foreach (self::EXPORT_FILENAMES as $filename) {
-            $filepath = temp_path($filename);
+        foreach (self::EXPORT_FILENAMES as $filenameToCheck) {
+            $filepath = temp_path($filenameToCheck);
             if (file_exists($filepath)) {
                 $file = $filepath;
                 $parts = explode('/', $file);
@@ -70,8 +70,13 @@ class ImportExportProducts extends Controller
         return Redirect::to($url);
     }
 
-    public function download()
+    public function download($name, $outputName = null)
     {
+        $queueEnabled = Config::get('initbiz.mallimportexport::export_queue.enabled');
+        if (!$queueEnabled) {
+            return $this->asExtension('ImportExportController')->download($name, $outputName);
+        }
+
         $file = '';
         foreach (self::EXPORT_FILENAMES as $filename) {
             $filepath = temp_path($filename);
@@ -115,14 +120,17 @@ class ImportExportProducts extends Controller
             return $this->asExtension('ImportExportController')->onExport();
         }
 
+        $exportOngoing = Cache::get(self::EXPORT_FILE_CACHE_KEY);
+        if (!empty($exportOngoing)) {
+            return Redirect::refresh();
+        }
+
         foreach (self::EXPORT_FILENAMES as $filename) {
             $filepath = temp_path($filename);
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
         }
-
-        Cache::put(self::EXPORT_FILE_CACHE_KEY, 0, 600);
 
         $columns = [];
         $definedColumns = $data['export_columns'] ?? [];
