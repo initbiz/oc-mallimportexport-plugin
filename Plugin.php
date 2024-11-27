@@ -37,7 +37,7 @@ class Plugin extends PluginBase
     public function boot()
     {
         Event::subscribe(\Initbiz\MallImportExport\EventHandlers\BackendHandler::class);
-        Event::subscribe(\Initbiz\MallImportExport\EventHandlers\OfflineMallHandler::class);
+        // Event::subscribe(\Initbiz\MallImportExport\EventHandlers\OfflineMallHandler::class);
     }
 
     /**
